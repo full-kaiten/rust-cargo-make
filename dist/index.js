@@ -37441,7 +37441,12 @@ async function run() {
                 archTopFolder = `cargo-make-v${cargoMakeVersion}-${arch}`;
                 break;
             case 'linux':
-                arch = 'x86_64-unknown-linux-musl';
+                if (os.arch() === 'arm64') {
+                    arch = 'aarch64-unknown-linux-gnu';
+                }
+                else {
+                    arch = 'x86_64-unknown-linux-musl';
+                }
                 archTopFolder = `cargo-make-v${cargoMakeVersion}-${arch}`;
                 break;
             default:
@@ -37451,7 +37456,10 @@ async function run() {
         const archive = `cargo-make-v${cargoMakeVersion}-${arch}`;
         // see https://docs.github.com/en/actions/reference/environment-variables#default-environment-variables
         const githubServerUrl = process.env['GITHUB_SERVER_URL'] || 'https://github.com';
-        const url = `${githubServerUrl}/sagiegurari/cargo-make/releases/download/${cargoMakeVersion}/${archive}.zip`;
+        const repo = arch === 'aarch64-unknown-linux-gnu'
+            ? 'full-kaiten/cargo-make'
+            : 'sagiegurari/cargo-make';
+        const url = `${githubServerUrl}/${repo}/releases/download/${cargoMakeVersion}/${archive}.zip`;
         info(`downloading (${cargoMakeVersion}) from ${url}`);
         const cargoMakeArchive = await downloadTool(url);
         const extractedFolder = await extractZip(cargoMakeArchive, tmpFolder);
